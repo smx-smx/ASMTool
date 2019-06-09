@@ -8,29 +8,16 @@
 #endregion
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace AsmTool
 {
-	class Program
+	public enum AsmPCIRegister : byte
 	{
-		static void Main(string[] args) {
-			Trace.WriteLine("Unloading ASM Driver...");
-			AsmIO.UnloadAsmIODriver();
-			Trace.WriteLine("Loading ASM Driver...");
-			if(AsmIO.LoadAsmIODriver() != 1) {
-				Console.Error.WriteLine("Failed to load ASM IO Driver");
-				return;
-			}
-
-
-			AsmDevice dev = new AsmDevice();
-			Trace.WriteLine("Dumping firmware...");
-			dev.DumpFirmware("dump.bin");
-			
-		}
+		RegisterSelect = 0x3E, //0x3E << 2 -> 0xF8
+		RegisterData   = 0x3F, //0x3F << 2 -> 0xFC
+		ControlRegister = 0x38 //0x38 << 2 -> 0xE0
 	}
 }

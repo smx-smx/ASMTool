@@ -32,9 +32,11 @@ namespace AsmTool
 		private readonly PCIBar bar;
 
 		public AsmDevice() {
+			Trace.WriteLine("Scanning for ASMedia ICs...");
 			if (!prb.FindByVendor(VID_2142, out pcidev) && !prb.FindByVendor(VID_3142, out pcidev))
 				throw new Exception($"No ASMedia device detected!");
 
+			Trace.WriteLine("Found ASMedia IC!");
 			uint barValue = PCIReadWord(0x10);
 			Trace.WriteLine($"BAR: {barValue:X8}");
 

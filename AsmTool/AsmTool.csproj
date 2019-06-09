@@ -51,6 +51,7 @@
     <Compile Include="AsmDevice.cs" />
     <Compile Include="AsmIORegister.cs" />
     <Compile Include="AsmMemory.cs" />
+    <Compile Include="AsmPCIRegister.cs" />
     <Compile Include="PCIAddress.cs" />
     <Compile Include="PCIBar.cs" />
     <Compile Include="Prober.cs" />
