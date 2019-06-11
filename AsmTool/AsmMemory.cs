@@ -21,10 +21,14 @@ namespace AsmTool
 		private readonly uint address;
 		private readonly uint size;
 
-		public AsmMemory(uint address, uint size) {
+		private readonly IAsmIO io;
+
+		public AsmMemory(IAsmIO io, uint address, uint size) {
+			this.io = io;
+
 			this.address = address;
 			this.size = size;
-			this.handle = AsmIO.MapAsmIO(address, size);
+			this.handle = io.MapAsmIO(address, size);
 		}
 
 		public unsafe byte[] Read(uint offset, uint size) {
@@ -39,11 +43,11 @@ namespace AsmTool
 		}
 
 		private unsafe void Read(byte *ptr, uint offset, uint size) {
-			AsmIO.ReadMEM(handle + offset, size, new IntPtr(ptr));
+			io.ReadMEM(handle + offset, size, new IntPtr(ptr));
 		}
 
 		public void Dispose() {
-			AsmIO.UnmapAsmIO(address, size);
+			io.UnmapAsmIO(address, size);
 		}
 	}
 }

@@ -24,7 +24,7 @@ namespace AsmTool
 		/* 20 */ public byte[] Unknown;
 	}
 
-	public class AsmIO
+	public class AsmIODll
 	{
 		[DllImport("asmiodll", CallingConvention = CallingConvention.StdCall, EntryPoint = "_LoadAsmIODriver@0", ExactSpelling = true)]
 		public static extern UInt32 LoadAsmIODriver();
@@ -86,6 +86,26 @@ namespace AsmTool
 
 		[DllImport("asmiodll", CallingConvention = CallingConvention.StdCall, EntryPoint = "_UnmapAsmIO@8", ExactSpelling = true)]
 		public static extern UInt32 UnmapAsmIO(UInt32 address, UInt32 size);
+	}
 
+	public class WindowsAsmIO : IAsmIO
+	{
+		public uint LoadAsmIODriver() => AsmIODll.LoadAsmIODriver();
+		public uint MapAsmIO(uint address, uint size) => AsmIODll.MapAsmIO(address, size);
+		public byte PCI_Read_BYTE(uint busNumber, uint deviceNumber, uint functionNumber, uint offset) => AsmIODll.PCI_Read_BYTE(busNumber, deviceNumber, functionNumber, offset);
+		public uint PCI_Read_DWORD(uint busNumber, uint deviceNumber, uint functionNumber, uint offset) => AsmIODll.PCI_Read_DWORD(busNumber, deviceNumber, functionNumber, offset);
+		public uint ReadCMD(uint busNumber, uint deviceNumber, uint functionNumber, IntPtr bufPtr) => AsmIODll.ReadCMD(busNumber, deviceNumber, functionNumber, bufPtr);
+		public uint ReadMEM(uint address, uint size, IntPtr bufPtr) => AsmIODll.ReadMEM(address, size, bufPtr);
+		public uint UnloadAsmIODriver() => AsmIODll.UnloadAsmIODriver();
+		public uint UnmapAsmIO(uint address, uint size) => AsmIODll.UnmapAsmIO(address, size);
+		public uint Wait_Read_Ready(uint busNumber, uint deviceNumber, uint functionNumber) => AsmIODll.Wait_Read_Ready(busNumber, deviceNumber, functionNumber);
+		public uint Wait_Write_Ready(uint busNumber, uint deviceNumber, uint functionNumber) => AsmIODll.Wait_Write_Ready(busNumber, deviceNumber, functionNumber);
+		public uint WriteCmdALL(uint busNumber, uint deviceNumber, uint functionNumber, uint cmd_reg_byte0, uint cmd_reg_byte1, uint cmd_reg_byte2, uint cmd_dat0, uint cmd_dat1, uint cmd_dat2) {
+			return AsmIODll.WriteCmdALL(
+				busNumber, deviceNumber, functionNumber,
+				cmd_reg_byte0, cmd_reg_byte1, cmd_reg_byte2,
+				cmd_dat0, cmd_dat1, cmd_dat2
+			);
+		}
 	}
 }

@@ -13,6 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AsmTool
@@ -23,7 +24,7 @@ namespace AsmTool
 
 		const uint FIRMWARE_SIZE = 131072; //128k ROM
 
-		private readonly Prober prb = new Prober();
+		private readonly Prober prb;
 		private readonly PCIAddress pcidev;
 
 		/// <summary>
@@ -31,28 +32,33 @@ namespace AsmTool
 		/// </summary>
 		private readonly PCIBar bar;
 
-		public AsmDevice() {
-			Trace.WriteLine("Scanning for ASMedia ICs...");
+		private readonly IAsmIO io;
+
+		public AsmDevice(IAsmIO io) {
+			this.io = io;
+			this.prb = new Prober(io);
+
+			Console.WriteLine("Scanning for ASMedia ICs...");
 			if (!prb.FindByVendor(VID_2142, out pcidev) && !prb.FindByVendor(VID_3142, out pcidev))
 				throw new Exception($"No ASMedia device detected!");
 
-			Trace.WriteLine("Found ASMedia IC!");
+			Console.WriteLine("Found ASMedia IC!");
 			uint barValue = PCIReadWord(0x10);
-			Trace.WriteLine($"BAR: {barValue:X8}");
+			Console.WriteLine($"BAR: {barValue:X8}");
 
 			this.bar = new PCIBar(barValue);
 		}
 
 		public AsmMemory NewMemoryMap(uint offset, uint size) {
-			return new AsmMemory(this.bar.BaseAddress + offset, size);
+			return new AsmMemory(io, this.bar.BaseAddress + offset, size);
 		}
 
 		public uint PCIReadWord(uint offset) {
-			return AsmIO.PCI_Read_DWORD(pcidev.Bus, pcidev.Device, pcidev.Function, offset);
+			return io.PCI_Read_DWORD(pcidev.Bus, pcidev.Device, pcidev.Function, offset);
 		}
 
 		public byte PCIReadByte(uint offset) {
-			return AsmIO.PCI_Read_BYTE(pcidev.Bus, pcidev.Device, pcidev.Function, offset);
+			return io.PCI_Read_BYTE(pcidev.Bus, pcidev.Device, pcidev.Function, offset);
 		}
 
 		private static uint ComputeInternalRegister(AsmIORegister r0, byte r1, byte r2) {
@@ -60,7 +66,7 @@ namespace AsmTool
 		}
 
 		private UInt32 WriteRegister(uint register, uint data) {
-			return AsmIO.WriteCmdALL(pcidev.Bus, pcidev.Device, pcidev.Function,
+			return io.WriteCmdALL(pcidev.Bus, pcidev.Device, pcidev.Function,
 				(register & 0xFF),
 				(register >> 8) & 0xFF,
 				(register >> 16) & 0xFF,
@@ -73,13 +79,14 @@ namespace AsmTool
 		public unsafe bool ReadPacket(out byte[] data) {
 			data = null;
 
-			if (AsmIO.Wait_Read_Ready(pcidev.Bus, pcidev.Device, pcidev.Function) < 0) {
+			if (io.Wait_Read_Ready(pcidev.Bus, pcidev.Device, pcidev.Function) < 0) {
+				Console.WriteLine("Wait_Read_Ready failed!");
 				return false;
 			}
 
 			data = new byte[0x2C];
 			fixed (byte* ptr = data) {
-				AsmIO.ReadCMD(pcidev.Bus, pcidev.Device, pcidev.Function, new IntPtr(ptr));
+				io.ReadCMD(pcidev.Bus, pcidev.Device, pcidev.Function, new IntPtr(ptr));
 			}
 
 			return true;
@@ -97,10 +104,13 @@ namespace AsmTool
 			BinaryWriter bw = new BinaryWriter(new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite));
 			for (uint i=0; i<num_reads; i++) {
 				if (!SPIReadQword(i * 8, out ulong qword)) {
-					Trace.WriteLine($"Invalid SPI Read at offset {i * 8}");
+					Console.WriteLine($"Invalid SPI Read at offset {i * 8}");
 					return false;
 				}
+				//Console.WriteLine($"QW: {qword:X16}");
 				bw.Write(qword);
+				//break;
+				//Thread.Sleep(1000);
 			}
 
 			bw.Close();
@@ -112,14 +122,17 @@ namespace AsmTool
 
 			uint SPIReg = ComputeInternalRegister(AsmIORegister.SPIRead, 0x10, 0x8);
 			if (WriteRegister(SPIReg, offset) < 0) {
+				Console.WriteLine("WriteRegister failed!");
 				return false;
 			}
 
 			if(!ReadPacket(out byte[] ack)) {
+				Console.WriteLine("Failed to read ack!");
 				return false;
 			}
 
 			if(!ReadPacket(out byte[] reply)) {
+				Console.WriteLine("Failed to read reply!");
 				return false;
 			}
 

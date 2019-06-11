@@ -18,17 +18,19 @@ namespace AsmTool
 	class Program
 	{
 		static void Main(string[] args) {
-			Trace.WriteLine("Unloading ASM Driver...");
-			AsmIO.UnloadAsmIODriver();
-			Trace.WriteLine("Loading ASM Driver...");
-			if(AsmIO.LoadAsmIODriver() != 1) {
+			IAsmIO io = AsmIOFactory.GetAsmIO();
+
+			Console.WriteLine("Unloading ASM Driver...");
+			io.UnloadAsmIODriver();
+			Console.WriteLine("Loading ASM Driver...");
+			if(io.LoadAsmIODriver() != 1) {
 				Console.Error.WriteLine("Failed to load ASM IO Driver");
 				return;
 			}
 
 
-			AsmDevice dev = new AsmDevice();
-			Trace.WriteLine("Dumping firmware...");
+			AsmDevice dev = new AsmDevice(io);
+			Console.WriteLine("Dumping firmware...");
 			dev.DumpFirmware("dump.bin");
 			
 		}
