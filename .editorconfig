@@ -1,0 +1,20 @@
+﻿[*]
+charset = utf-8
+end_of_line = crlf
+
+[*.xml]
+indent_style = space
+
+[*.cs]
+indent_style = tab
+indent_size = 4
+csharp_new_line_before_open_brace = types,anonymous_types
+csharp_indent_labels = no_change
+csharp_indent_case_contents = true
+csharp_indent_switch_labels = true
+csharp_new_line_before_catch = false
+csharp_new_line_before_else = false
+csharp_new_line_before_finally = false
+
+csharp_style_expression_bodied_properties = when_on_single_line:suggestion
+csharp_style_expression_bodied_accessors = when_on_single_line:suggestion
