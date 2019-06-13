@@ -24,3 +24,6 @@ Place all files next to the ASMTool executable (obtained by building this projec
 You can either extend this program and add new functionality, or
 
 open a new Issue and attach the firmware obtained by running this program, so that other users can update their firmwares or try older versions to see if they work better
+
+# They are custom Intel 8051 cores!
+It turns out ASMedia USB controllers are custom Intel 8051 cores, and the firmware file can be disassembled into i8051 assembly
