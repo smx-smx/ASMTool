@@ -1,11 +1,7 @@
 # ASMTool
 Firmware dumper and various utilities for PCI based ASMedia USB Controllers
 
-This was tested with an ASM2142 Controller.
-
-ASM3142 support was not tested, use at your own risk or contact me if you have information about them.
-
-ASM1xxx is not supported yet. Contact me if you have a PCIe based device.
+It looks like all ICs in the ASM1x4x, ASM2x4x and ASM3x4x family use the same interface and share the same registers, but i only tested this with the ASM2142 Controller that i have in my system.
 
 # Why?
 I'm having issues with my ASM2142 controller (lockup with USB 3.1 and large transfers), and i couldn't find a way to dump the current firmware.
