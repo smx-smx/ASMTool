@@ -9,7 +9,12 @@ I'm having issues with my ASM2142 controller (lockup with USB 3.1 and large tran
 The firmware updater can internally read the firmware, but it doesn't offer a way to save it.
 
 # How to use
-To use this, you'll need `AsmIo.sys` (for 32bit Windows) or `AsmIo64.sys` (for 64bit Windows).
+## Linux
+```gcc -fPIC -Ofast Linux/AsmIOLinux.c -o libAsmIOLinux.so```
+Place the resulting `.so` file next to the ASMTool executable (obtained by building this project)
+
+## Windows
+You'll need `AsmIo.sys` (for 32bit Windows) or `AsmIo64.sys` (for 64bit Windows).
 
 You will also need `asmiodll.dll`. You can find these files if you google `ASM2142 firmware`.
 Download the firmware updater and you'll find the files in there.
