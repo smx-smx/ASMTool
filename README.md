@@ -28,3 +28,9 @@ open a new Issue and attach the firmware obtained by running this program, so th
 
 # They are custom Intel 8051 cores!
 It turns out ASMedia USB controllers are custom Intel 8051 cores, and the firmware file can be disassembled into i8051 assembly
+
+# Security implications
+It looks like this interface could be used to flash malicious code onto ASMedia chips, as explained by
+https://chefkochblog.wordpress.com/2018/03/19/asmedia-usb-3-x-controller-with-keylogger-and-malware-risks/
+
+The chip performs no signature checks on the code being flashed and, being a PCIe device, could abuse DMA to read and write arbitrary memory
