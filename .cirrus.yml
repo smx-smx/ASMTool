@@ -1,0 +1,25 @@
+linux_x64_task:
+  container:
+    cpu: 2
+    memory: 2G
+    dockerfile: .ci/linux_x64/Dockerfile
+
+  build_script:
+    - dotnet build -p:Configuration=Debug -m
+
+  binaries_artifacts:
+    path: AsmTool/bin/Debug/net6.0
+
+
+windows_x64_task:
+  windows_container:
+    cpu: 2
+    memory: 2G
+    dockerfile: .ci/windows_x64/Dockerfile
+    os_version: 2019
+
+  build_script:
+    - dotnet build -p:Configuration=Debug -m
+
+  binaries_artifacts:
+    path: AsmTool/bin/Debug/net6.0
