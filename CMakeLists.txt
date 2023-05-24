@@ -36,7 +36,9 @@ endif()
 
 add_custom_target(create_zip
 	COMMENT "Compressing..."
-	COMMAND ${SEVENZIP_BIN} a ${file_list}
+	COMMAND ${SEVENZIP_BIN} a
+		${CMAKE_BINARY_DIR}/AsmTool-${build_shorthash}.zip
+		${file_list}
 )
 add_dependencies(create_zip AsmTool_sln)
 
