@@ -12,6 +12,11 @@ ADD_DOTNET(${CMAKE_SOURCE_DIR}/AsmTool.sln
 	TARGET_NAME AsmTool_sln
 )
 
+if(UNIX)
+	enable_language(C)
+	add_subdirectory(AsmTool/Linux)
+endif()
+
 include(FindSevenZip)
 execute_process(
 	COMMAND git rev-parse HEAD
@@ -20,11 +25,18 @@ execute_process(
 )
 string(SUBSTRING "${head_sha}" 0 10 build_shorthash)
 
+set(file_list "")
+list(APPEND file_list
+	${CMAKE_BINARY_DIR}/AsmTool/net6.0/*
+)
+
+if(UNIX)
+	list(APPEND file_list $<TARGET_FILE:asmIoLinux>)
+endif()
+
 add_custom_target(create_zip
 	COMMENT "Compressing..."
-	COMMAND ${SEVENZIP_BIN} a
-		${CMAKE_BINARY_DIR}/AsmTool-${build_shorthash}.zip
-		${CMAKE_BINARY_DIR}/AsmTool/net6.0/*
+	COMMAND ${SEVENZIP_BIN} a ${file_list}
 )
 add_dependencies(create_zip AsmTool_sln)
 
