@@ -76,7 +76,7 @@ namespace AsmTool
 			);
 		}
 
-		public unsafe bool ReadPacket(out byte[] data) {
+		public unsafe bool ReadPacket(out byte[]? data) {
 			data = null;
 
 			if (io.Wait_Read_Ready(pcidev.Bus, pcidev.Device, pcidev.Function) < 0) {
@@ -92,7 +92,7 @@ namespace AsmTool
 			return true;
 		}
 
-		private static unsafe T ReadStructure<T>(byte[] data) {
+		private static unsafe T? ReadStructure<T>(byte[] data) {
 			fixed (byte* ptr = data) {
 				return Marshal.PtrToStructure<T>(new IntPtr(ptr));
 			}
@@ -126,12 +126,12 @@ namespace AsmTool
 				return false;
 			}
 
-			if(!ReadPacket(out byte[] ack)) {
+			if(!ReadPacket(out byte[]? ack) || ack == null) {
 				Console.WriteLine("Failed to read ack!");
 				return false;
 			}
 
-			if(!ReadPacket(out byte[] reply)) {
+			if(!ReadPacket(out byte[]? reply) || reply == null) {
 				Console.WriteLine("Failed to read reply!");
 				return false;
 			}
