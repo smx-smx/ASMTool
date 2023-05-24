@@ -5,10 +5,11 @@ linux_x64_task:
     dockerfile: .ci/linux_x64/Dockerfile
 
   build_script:
-    - dotnet build -p:Configuration=Debug -m
+    - cmake -B build
+    - cmake --build build
 
   binaries_artifacts:
-    path: AsmTool/bin/Debug/net6.0
+    path: build/AsmTool*.zip
 
 
 windows_x64_task:
@@ -19,7 +20,8 @@ windows_x64_task:
     os_version: 2019
 
   build_script:
-    - dotnet build -p:Configuration=Debug -m
+    - cmake -B build
+    - cmake --build build
 
   binaries_artifacts:
-    path: AsmTool/bin/Debug/net6.0
+    path: build/AsmTool*.zip
