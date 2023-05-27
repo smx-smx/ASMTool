@@ -61,22 +61,96 @@ namespace AsmTool
 			return io.PCI_Read_BYTE(pcidev.Bus, pcidev.Device, pcidev.Function, offset);
 		}
 
-		private static uint ComputeInternalRegister(AsmIORegister r0, byte r1, byte r2) {
-			return (uint)((byte)r0 + ((r1 + (r2 << 8)) << 8));
+		private static byte[] BuildAsmCommand(
+			ASMIOCommand mode, ASMIOFunction function, byte size
+		) {
+			return new byte[] {
+				(byte)mode, (byte)function, size
+			};
 		}
 
-		private UInt32 WriteRegister(uint register, uint data) {
+		private UInt32 WriteRegister(byte[] reg, uint data, uint data2 = 0, uint data3 = 0) {
 			return io.WriteCmdALL(pcidev.Bus, pcidev.Device, pcidev.Function,
-				(register & 0xFF),
-				(register >> 8) & 0xFF,
-				(register >> 16) & 0xFF,
-				data,
-				0,
-				0
+				reg[0], reg[1], reg[2],
+				data, data2, data3
 			);
 		}
 
-		public unsafe bool ReadPacket(out byte[]? data) {
+		private bool WaitWrite() {
+			if(io.Wait_Write_Ready(pcidev.Bus, pcidev.Device, pcidev.Function) < 0) {
+				return false;
+			}
+			return true;
+		}
+		
+		public unsafe bool WriteMemory(uint address, byte[] bytes) {
+			var reg = BuildAsmCommand(ASMIOCommand.Write, ASMIOFunction.Memory, (byte)bytes.Length);
+
+
+			var span = bytes.AsSpan();
+			while(span.Length > 0) {
+				var length = Math.Min(8, span.Length);
+
+				ulong value = 0;
+				for (int i = 0; i < length; i++) {
+					value |= (uint)(span[i] << (i * 8));
+				}
+
+				span = span.Slice(length);
+
+				uint word0 = (uint)(value >> 0);
+				uint word1 = (uint)(value >> 32);
+				Trace.WriteLine($"W0 is {word0}, W1 is {word1}");
+
+				if (WriteRegister(reg, address, word0, word1) < 0) {
+					return false;
+				}
+				if (!WaitWrite()) {
+					return false;
+				}
+			}
+						
+
+			return true;
+		}
+
+		public unsafe byte[]? ReadMemory(uint address) {
+			byte wordSize = 4;
+			var reg = BuildAsmCommand(ASMIOCommand.Read, ASMIOFunction.Memory, wordSize);
+			if (WriteRegister(reg, address) < 0) {
+				Console.WriteLine("WriteRegister failed!");
+				return null;
+			}
+
+			if (!ReadPacket(wordSize, out byte[]? ack) || ack == null) {
+				Console.WriteLine("Failed to read ack!");
+				return null;
+			}
+
+			byte[] word = new byte[wordSize];
+			if (!ReadPacketSmall(wordSize, word)) {
+				Console.WriteLine("Failed to read data!");
+				return null;
+			}
+			return word;
+		}
+
+		public unsafe bool ReadPacketSmall(int wordSize, byte[] data) {
+			if (io.Wait_Read_Ready(pcidev.Bus, pcidev.Device, pcidev.Function) < 0) {
+				Console.WriteLine("Wait_Read_Ready failed!");
+				return false;
+			}
+
+			for (int i = 0; i < wordSize; i++) {
+				byte offset = (byte)(0xF0 + i);
+				data[i] = io.PCI_Read_BYTE(pcidev.Bus, pcidev.Device, pcidev.Function, offset);
+				io.PCI_Write_BYTE(pcidev.Bus, pcidev.Device, pcidev.Function, 0xE0, 1);
+			}
+
+			return true;
+		}
+
+		public unsafe bool ReadPacket(uint wordSize, out byte[]? data) {
 			data = null;
 
 			if (io.Wait_Read_Ready(pcidev.Bus, pcidev.Device, pcidev.Function) < 0) {
@@ -88,7 +162,6 @@ namespace AsmTool
 			fixed (byte* ptr = data) {
 				io.ReadCMD(pcidev.Bus, pcidev.Device, pcidev.Function, new IntPtr(ptr));
 			}
-
 			return true;
 		}
 
@@ -117,21 +190,22 @@ namespace AsmTool
 			return true;
 		}
 
-		public unsafe bool SPIReadQword(uint offset, out ulong qword) {
+		public bool SPIReadQword(uint offset, out ulong qword) {
 			qword = 0;
 
-			uint SPIReg = ComputeInternalRegister(AsmIORegister.SPIRead, 0x10, 0x8);
+			byte wordSize = 0x8;
+			var SPIReg = BuildAsmCommand(ASMIOCommand.Read, ASMIOFunction.Flash, wordSize);
 			if (WriteRegister(SPIReg, offset) < 0) {
 				Console.WriteLine("WriteRegister failed!");
 				return false;
 			}
 
-			if(!ReadPacket(out byte[]? ack) || ack == null) {
+			if(!ReadPacket(wordSize, out byte[]? ack) || ack == null) {
 				Console.WriteLine("Failed to read ack!");
 				return false;
 			}
 
-			if(!ReadPacket(out byte[]? reply) || reply == null) {
+			if(!ReadPacket(wordSize, out byte[]? reply) || reply == null) {
 				Console.WriteLine("Failed to read reply!");
 				return false;
 			}
@@ -142,6 +216,24 @@ namespace AsmTool
 			qword = ((ulong)(pkt.Data2) << 32) | pkt.Data1;
 
 			return true;
+		}
+
+		public void DumpMemory() {
+			var MEM_SIZE = 128*1024 ;
+			using var fh = new FileStream("mem.bin",
+				FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
+			fh.SetLength(0);
+
+			var wordSize = 4;
+			for (int i = 0; i < MEM_SIZE; i+=wordSize) {
+				var data = ReadMemory((uint)i);
+				if (data != null) {
+					Console.WriteLine("writing");
+					fh.Write(data);
+				} else {
+					break;
+				}
+			}
 		}
 	}
 }

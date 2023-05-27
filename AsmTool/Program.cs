@@ -28,10 +28,20 @@ namespace AsmTool
 				return;
 			}
 
-
 			AsmDevice dev = new AsmDevice(io);
-			Console.WriteLine("Dumping firmware...");
-			dev.DumpFirmware("dump.bin");
+
+			if (args.Length > 0) {
+				switch (args[0]) {
+					case "mem_read":
+						dev.DumpMemory();
+						break;
+					case "flash_read":
+					default:
+						Console.WriteLine("Dumping firmware...");
+						dev.DumpFirmware("dump.bin");
+						break;
+				}
+			}
 			
 		}
 	}

@@ -56,6 +56,10 @@ namespace AsmTool
 			return LinuxNativeIO.PCI_Read_DWORD(busNumber, deviceNumber, functionNumber, offset);
 		}
 
+		public uint PCI_Write_BYTE(uint busNumber, uint deviceNumber, uint functionNumber, uint offset, byte value) {
+			throw new NotImplementedException();
+		}
+
 		public uint ReadCMD(uint busNumber, uint deviceNumber, uint functionNumber, IntPtr bufPtr) {
 			return LinuxNativeIO.ReadCMD(busNumber, deviceNumber, functionNumber, bufPtr);
 		}
@@ -69,6 +73,7 @@ namespace AsmTool
 		}
 
 		public uint UnmapAsmIO(uint address, uint size) {
+			// $TODO
 			throw new NotImplementedException();
 		}
 
