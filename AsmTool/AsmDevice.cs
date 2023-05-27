@@ -144,8 +144,9 @@ namespace AsmTool
 			for (int i = 0; i < wordSize; i++) {
 				byte offset = (byte)(0xF0 + i);
 				data[i] = io.PCI_Read_BYTE(pcidev.Bus, pcidev.Device, pcidev.Function, offset);
-				io.PCI_Write_BYTE(pcidev.Bus, pcidev.Device, pcidev.Function, 0xE0, 1);
 			}
+			// signal read end
+			io.PCI_Write_BYTE(pcidev.Bus, pcidev.Device, pcidev.Function, 0xE0, 1);
 
 			return true;
 		}
