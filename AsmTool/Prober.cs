@@ -28,7 +28,7 @@ namespace AsmTool
 		}
 
 
-		public bool FindByVendor(UInt32 vid, out PCIAddress addr) {
+		public bool FindByProduct(UInt32 vid, out PCIAddress addr) {
 			for(uint i=0; i<PCI_BUS_MAX; i++) {
 				for(uint j=0; j<PCI_DEV_MAX; j++) {
 					for(uint k=0; k<PCI_FUNC_MAX; k++) {

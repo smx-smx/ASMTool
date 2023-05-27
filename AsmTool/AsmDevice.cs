@@ -19,8 +19,8 @@ using System.Threading.Tasks;
 namespace AsmTool
 {
 	public class AsmDevice {
-		const uint VID_2142 = 0x2142;
-		const uint VID_3142 = 0x3142;
+		const uint PID_2142 = 0x2142;
+		const uint PID_3142 = 0x3142;
 
 		const uint FIRMWARE_SIZE = 131072; //128k ROM
 
@@ -39,7 +39,7 @@ namespace AsmTool
 			this.prb = new Prober(io);
 
 			Console.WriteLine("Scanning for ASMedia ICs...");
-			if (!prb.FindByVendor(VID_2142, out pcidev) && !prb.FindByVendor(VID_3142, out pcidev))
+			if (!prb.FindByProduct(PID_2142, out pcidev) && !prb.FindByProduct(PID_3142, out pcidev))
 				throw new Exception($"No ASMedia device detected!");
 
 			Console.WriteLine("Found ASMedia IC!");
