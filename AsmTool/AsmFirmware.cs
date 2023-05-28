@@ -87,21 +87,38 @@ namespace AsmTool
 			return fwChipName;
 		}
 
+		private string ReadFooterSignature() {
+			var offset = HeaderSize + BodySize + 9;
+			return stream.PerformAt(offset, () => {
+				return stream.ReadString(8, Encoding.ASCII);
+			});
+		}
+
 		private string ReadStringSignature() {
 			return stream.PerformAt(6, () => { 
 				return stream.ReadString(10, Encoding.ASCII);
 			});
 		}
 
-		private byte ChecksumLength {
+		private byte HeaderSize {
 			get {
 				return Span[4];
 			}
 		}
 
+		private uint BodySize {
+			get {
+				return (0u
+					| (uint)(Span[HeaderSize + 5] << 0)
+					| (uint)(Span[HeaderSize + 6] << 8)
+					| (uint)(Span[HeaderSize + 7] << 16)
+				);
+			}
+		}
+
 		private byte FileChecksum {
 			get {
-				return Span[ChecksumLength];
+				return Span[HeaderSize];
 			}
 		}
 
@@ -109,15 +126,15 @@ namespace AsmTool
 			byte p0 = 0;
 			byte p1 = 0;
 			int i = 0;
-			if (ChecksumLength >= 2) {
-				for (i = 0; i < ChecksumLength; i += 2) {
+			if (HeaderSize >= 2) {
+				for (i = 0; i < HeaderSize; i += 2) {
 					p0 += Span[i];
 					p1 += Span[i + 1];
 				}
 			}
 
 			byte p2;
-			if (i >= ChecksumLength) {
+			if (i >= HeaderSize) {
 				p2 = 0;
 			} else {
 				p2 = Span[i];
@@ -155,6 +172,8 @@ namespace AsmTool
 				AsmFirmwareChipType.Asm3142 => "ASM3142",
 				_ => "Unknown"
 			};
+			os.WriteLine($"Footer: " + ReadFooterSignature());
+
 			os.WriteLine($"Chip: 0x{(byte)fwChipType:X2}: {fwChipName}");
 
 			os.WriteLine("==== Actual Chip Info ====");
