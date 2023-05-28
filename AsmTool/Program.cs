@@ -42,7 +42,8 @@ namespace AsmTool
 						break;
 				}
 			}
-			
+
+			io.UnloadAsmIODriver();
 		}
 	}
 }
