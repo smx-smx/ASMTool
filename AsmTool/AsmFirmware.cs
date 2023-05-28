@@ -212,7 +212,7 @@ namespace AsmTool
 			os.WriteLine($"Computed Checksum [header]: {compHeaderChecksum:X2}");
 			os.WriteLine($"Computed Checksum [body]: {compBodyChecksum:X2}");
 
-			if (HeaderChecksum != compHeaderChecksum) {
+			if (HeaderChecksum != compHeaderChecksum || BodyChecksum != compBodyChecksum) {
 				os.WriteLine("!! WARNING: Checksum Mismatch");
 			}
 
