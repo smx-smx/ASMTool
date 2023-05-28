@@ -32,6 +32,21 @@ namespace AsmTool
 
 			if (args.Length > 0) {
 				switch (args[0]) {
+					case "fw_set_type":
+						{
+							var patchedFile = Path.Combine(
+								Path.GetDirectoryName(args[1]),
+								Path.GetFileNameWithoutExtension(args[1]) + "_patched.bin"
+							);
+							File.Copy(args[1], patchedFile, true);
+							using var fw = new AsmFirmware(patchedFile);
+							var newType = args[2] == "2142"
+								? AsmFirmwareChipType.Asm2142
+								: AsmFirmwareChipType.Asm3142;
+							Console.WriteLine($"Setting {newType}");
+							fw.SetChipType(newType);
+							break;
+						}
 					case "fw_info": {
 						using var fw = new AsmFirmware(args[1]);
 						fw.PrintInfo(dev, Console.Out);

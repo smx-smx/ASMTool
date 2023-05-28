@@ -37,8 +37,19 @@ namespace AsmTool
 
 		public AsmFirmware(string firmwarePath) {
 			filePath = firmwarePath;
-			mf = MFile.Open(firmwarePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+			mf = MFile.Open(firmwarePath, FileMode.Open,
+				FileAccess.Read | FileAccess.Write, FileShare.Read);
 			stream = new SpanStream(mf);
+		}
+
+		private void UpdateChecksum() {
+			Span[HeaderChecksumOffset] = ComputeHeaderChecksum();
+			Span[BodyChecksumOffset] = ComputeBodyChecksum();
+		}
+
+		public void SetChipType(AsmFirmwareChipType type) {
+			Span[0xBC] = (byte)type;
+			UpdateChecksum();
 		}
 
 		private int GetSignatureType() {
@@ -100,9 +111,12 @@ namespace AsmTool
 			});
 		}
 
-		private byte HeaderSize {
+		private ushort HeaderSize {
 			get {
-				return Span[4];
+				return (ushort)((ushort)0u
+					| (ushort)(Span[4] << 0)
+					| (ushort)(Span[5] << 8)
+				);
 			}
 		}
 
@@ -116,13 +130,50 @@ namespace AsmTool
 			}
 		}
 
-		private byte FileChecksum {
+		private int HeaderChecksumOffset => HeaderSize;
+		private int BodyChecksumOffset => (int)(HeaderSize + BodyStartOffset + BodySize + 8);
+
+		
+		private byte HeaderChecksum => Span[HeaderChecksumOffset];
+		private byte BodyChecksum => Span[BodyChecksumOffset];
+
+		private int BodyStartOffset {
 			get {
-				return Span[HeaderSize];
+				if (ReadStringSignature() == MAGIC_GEN1) return 7;
+				return 9;
 			}
 		}
 
-		private byte ComputeChecksum() {
+		private byte ComputeBodyChecksum() {
+			var body_start_offset = BodyStartOffset;
+
+			byte p0 = 0;
+			byte p1 = 0;
+			int i = 0;
+
+			var body_start = HeaderSize + body_start_offset;
+			if (BodySize >= 2) {
+				for (i = 0; i < BodySize; i += 2) {
+					p0 += Span[body_start + i];
+					p1 += Span[body_start + i + 1];
+				}
+			}
+
+			byte p2;
+			if (i >= BodySize) {
+				p2 = 0;
+			} else {
+				p2 = Span[body_start + i];
+			}
+
+			byte checksum = 0;
+			checksum += p0;
+			checksum += p1;
+			checksum += p2;
+			return checksum;
+		}
+
+		private byte ComputeHeaderChecksum() {
 			byte p0 = 0;
 			byte p1 = 0;
 			int i = 0;
@@ -149,18 +200,19 @@ namespace AsmTool
 		}
 
 		public void PrintInfo(AsmDevice dev, TextWriter os) {
-			var mem = mf.Span.Memory;
-			var fwVer = GetFirmwareVersionString();
-
-			os.WriteLine("==== Firmware Info ====");
+			os.WriteLine("==== File Info ====");
 			os.WriteLine($"File: {filePath}");
 
-			var computedChecksum = ComputeChecksum();
+			var compHeaderChecksum = ComputeHeaderChecksum();
+			var compBodyChecksum = ComputeBodyChecksum();
 
-			os.WriteLine($"File Checksum: {FileChecksum:X2}");
-			os.WriteLine($"Computed Checksum: {computedChecksum:X2}");
+			os.WriteLine($"File Checksum [header]: {HeaderChecksum:X2}");
+			os.WriteLine($"File Checksum [body]: {BodyChecksum:X2}");
 
-			if (FileChecksum != computedChecksum) {
+			os.WriteLine($"Computed Checksum [header]: {compHeaderChecksum:X2}");
+			os.WriteLine($"Computed Checksum [body]: {compBodyChecksum:X2}");
+
+			if (HeaderChecksum != compHeaderChecksum) {
 				os.WriteLine("!! WARNING: Checksum Mismatch");
 			}
 
