@@ -28,7 +28,7 @@ namespace AsmTool
 		}
 
 
-		public bool FindByProduct(UInt32 vid, out PCIAddress addr) {
+		public bool FindByProduct(UInt32 pid, out PCIAddress addr) {
 			for(uint i=0; i<PCI_BUS_MAX; i++) {
 				for(uint j=0; j<PCI_DEV_MAX; j++) {
 					for(uint k=0; k<PCI_FUNC_MAX; k++) {
@@ -37,11 +37,11 @@ namespace AsmTool
 						if (ident == 0xFFFFFFFF) {
 							continue;
 						}
-						uint dev_vid = (ident >> 16) & 0xFFFF;
-						uint dev_pid = (ident & 0xFFFF);
+						uint dev_pid = (ident >> 16) & 0xFFFF;
+						uint dev_vid = (ident & 0xFFFF);
 						Console.WriteLine($"[bus:{i:X}, dev:{j:X}, func:{k:X}] {dev_vid:X4}:{dev_pid:X4}");
 
-						if(dev_vid == vid) {
+						if(dev_pid == pid) {
 							addr = new PCIAddress() {
 								Bus = i,
 								Device = j,
