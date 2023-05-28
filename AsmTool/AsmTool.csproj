@@ -13,4 +13,8 @@
     <Folder Include="Properties\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Smx.SharpIO" Version="1.0.0" />
+  </ItemGroup>
+
 </Project>

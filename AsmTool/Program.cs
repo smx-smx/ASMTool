@@ -32,6 +32,11 @@ namespace AsmTool
 
 			if (args.Length > 0) {
 				switch (args[0]) {
+					case "fw_info": {
+						using var fw = new AsmFirmware(args[1]);
+						fw.PrintInfo(dev, Console.Out);
+						break;
+					}
 					case "mem_read":
 						dev.DumpMemory();
 						break;
