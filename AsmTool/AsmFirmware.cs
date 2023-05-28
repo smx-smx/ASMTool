@@ -29,6 +29,12 @@ namespace AsmTool
 		private const string MAGIC_GEN1 = "2114A_RCFG";
 		private const string MAGIC_GEN2 = "2214A_RCFG";
 
+		private Span<byte> Span {
+			get {
+				return mf.Span.Memory.Span;
+			}
+		}
+
 		public AsmFirmware(string firmwarePath) {
 			filePath = firmwarePath;
 			mf = MFile.Open(firmwarePath, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -87,12 +93,60 @@ namespace AsmTool
 			});
 		}
 
+		private byte ChecksumLength {
+			get {
+				return Span[4];
+			}
+		}
+
+		private byte FileChecksum {
+			get {
+				return Span[ChecksumLength];
+			}
+		}
+
+		private byte ComputeChecksum() {
+			byte p0 = 0;
+			byte p1 = 0;
+			int i = 0;
+			if (ChecksumLength >= 2) {
+				for (i = 0; i < ChecksumLength; i += 2) {
+					p0 += Span[i];
+					p1 += Span[i + 1];
+				}
+			}
+
+			byte p2;
+			if (i >= ChecksumLength) {
+				p2 = 0;
+			} else {
+				p2 = Span[i];
+			}
+
+			byte checksum = 0;
+			checksum += p0;
+			checksum += p1;
+			checksum += p2;
+			return checksum;
+
+		}
+
 		public void PrintInfo(AsmDevice dev, TextWriter os) {
 			var mem = mf.Span.Memory;
 			var fwVer = GetFirmwareVersionString();
 
 			os.WriteLine("==== Firmware Info ====");
 			os.WriteLine($"File: {filePath}");
+
+			var computedChecksum = ComputeChecksum();
+
+			os.WriteLine($"File Checksum: {FileChecksum:X2}");
+			os.WriteLine($"Computed Checksum: {computedChecksum:X2}");
+
+			if (FileChecksum != computedChecksum) {
+				os.WriteLine("!! WARNING: Checksum Mismatch");
+			}
+
 			os.WriteLine($"Signature: " + ReadStringSignature());
 			os.WriteLine($"FW Name: " + GetFirmwareName());
 			var fwChipType = GetFirmwareChipType();
