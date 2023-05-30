@@ -7,7 +7,14 @@ if(WIN32)
 	set(REKO_COMPILER "Visual Studio 17 2022")
 endif()
 
+set(target_platform "")
+if(WIN32)
+	# required for asmdll interop
+	set(target_platform PLATFORM x86)
+endif()
+
 ADD_DOTNET(${CMAKE_SOURCE_DIR}/AsmTool.sln
+	${target_platform}
 	CONFIG ${CMAKE_BUILD_TYPE}
 	TARGET_NAME AsmTool_sln
 )
@@ -15,6 +22,7 @@ ADD_DOTNET(${CMAKE_SOURCE_DIR}/AsmTool.sln
 if(UNIX)
 	enable_language(C)
 	add_subdirectory(AsmTool/Linux)
+	add_dependencies(AsmTool_sln asmIoLinux)
 endif()
 
 include(FindSevenZip)
