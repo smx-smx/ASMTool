@@ -19,6 +19,8 @@ namespace AsmTool
 
 		[DllImport("AsmIOLinux.so")]
 		public static extern byte PCI_Read_BYTE(uint busNumber, uint deviceNumber, uint functionNumber, uint offset);
+		[DllImport("AsmIOLinux.so")]
+		public static extern uint PCI_Write_BYTE(uint busNumber, uint deviceNumber, uint functionNumber, uint offset, byte value);
 
 		[DllImport("AsmIOLinux.so")]
 		public static extern uint PCI_Read_DWORD(uint busNumber, uint deviceNumber, uint functionNumber, uint offset);
@@ -57,7 +59,7 @@ namespace AsmTool
 		}
 
 		public uint PCI_Write_BYTE(uint busNumber, uint deviceNumber, uint functionNumber, uint offset, byte value) {
-			throw new NotImplementedException();
+			return LinuxNativeIO.PCI_Write_BYTE(busNumber, deviceNumber, functionNumber, offset, value);
 		}
 
 		public uint ReadCMD(uint busNumber, uint deviceNumber, uint functionNumber, IntPtr bufPtr) {
