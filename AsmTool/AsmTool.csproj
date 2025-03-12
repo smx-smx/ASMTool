@@ -6,6 +6,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <!-- force 32bit on Windows for native AsmIO interop -->
+  <PropertyGroup Condition="'$(OS)'=='Windows_NT'">
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
 
