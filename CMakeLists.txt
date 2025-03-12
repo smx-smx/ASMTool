@@ -35,7 +35,7 @@ string(SUBSTRING "${head_sha}" 0 10 build_shorthash)
 
 set(file_list "")
 list(APPEND file_list
-	${CMAKE_BINARY_DIR}/AsmTool/net6.0/*
+	${CMAKE_BINARY_DIR}/AsmTool/net8.0/*
 )
 
 if(UNIX)
