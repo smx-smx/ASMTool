@@ -113,7 +113,9 @@
 # 
 # Require 3.5 for batch copy multiple files
 
-cmake_minimum_required(VERSION 3.5.0)
+## commented to silence CMake deprecation warning (< 3.10).
+## the including file is expected to check for a sane CMake version anyways
+#cmake_minimum_required(VERSION 3.5.0)
 
 IF(DOTNET_FOUND)
     RETURN()
