@@ -22,7 +22,7 @@ ADD_DOTNET(${CMAKE_SOURCE_DIR}/AsmTool.sln
 if(UNIX)
 	enable_language(C)
 	add_subdirectory(AsmTool/Linux)
-	add_dependencies(AsmTool_sln asmIoLinux)
+	add_dependencies(AsmTool_sln AsmIoLinux)
 endif()
 
 include(FindSevenZip)
@@ -39,7 +39,7 @@ list(APPEND file_list
 )
 
 if(UNIX)
-	list(APPEND file_list $<TARGET_FILE:asmIoLinux>)
+	list(APPEND file_list $<TARGET_FILE:AsmIoLinux>)
 endif()
 
 add_custom_target(create_zip

@@ -14,27 +14,27 @@ namespace AsmTool
 {
 	public class LinuxNativeIO
 	{
-		[DllImport("AsmIOLinux.so")]
+		[DllImport("libAsmIoLinux")]
 		public static extern uint LoadAsmIODriver();
 
-		[DllImport("AsmIOLinux.so")]
+		[DllImport("libAsmIoLinux")]
 		public static extern byte PCI_Read_BYTE(uint busNumber, uint deviceNumber, uint functionNumber, uint offset);
-		[DllImport("AsmIOLinux.so")]
+		[DllImport("libAsmIoLinux")]
 		public static extern uint PCI_Write_BYTE(uint busNumber, uint deviceNumber, uint functionNumber, uint offset, byte value);
 
-		[DllImport("AsmIOLinux.so")]
+		[DllImport("libAsmIoLinux")]
 		public static extern uint PCI_Read_DWORD(uint busNumber, uint deviceNumber, uint functionNumber, uint offset);
 
-		[DllImport("AsmIOLinux.so")]
+		[DllImport("libAsmIoLinux")]
 		public static extern uint Wait_Read_Ready(uint busNumber, uint deviceNumber, uint functionNumber);
 
-		[DllImport("AsmIOLinux.so")]
+		[DllImport("libAsmIoLinux")]
 		public static extern uint Wait_Write_Ready(uint busNumber, uint deviceNumber, uint functionNumber);
 
-		[DllImport("AsmIOLinux.so")]
+		[DllImport("libAsmIoLinux")]
 		public static extern uint ReadCMD(uint busNumber, uint deviceNumber, uint functionNumber, IntPtr pBuf);
 
-		[DllImport("AsmIOLinux.so")]
+		[DllImport("libAsmIoLinux")]
 		public static extern uint WriteCmdALL(uint busNumber, uint deviceNumber, uint functionNumber, uint cmd_reg_byte0, uint cmd_reg_byte1, uint cmd_reg_byte2, uint cmd_dat0, uint cmd_dat1, uint cmd_dat2);
 	}
 

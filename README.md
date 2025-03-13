@@ -10,7 +10,7 @@ The firmware updater can internally read the firmware, but it doesn't offer a wa
 
 # How to use
 ## Linux
-```gcc -shared -o libAsmIOLinux.so -fPIC Linux/AsmIOLinux.c```
+```gcc -shared -o libAsmIoLinux.so -fPIC Linux/AsmIOLinux.c```
 Place the resulting `.so` file next to the ASMTool executable (obtained by building this project)
 
 ## Windows
