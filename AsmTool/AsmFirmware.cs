@@ -206,14 +206,13 @@ namespace AsmTool
 			var compHeaderChecksum = ComputeHeaderChecksum();
 			var compBodyChecksum = ComputeBodyChecksum();
 
-			os.WriteLine($"File Checksum [header]: {HeaderChecksum:X2}");
-			os.WriteLine($"File Checksum [body]: {BodyChecksum:X2}");
-
-			os.WriteLine($"Computed Checksum [header]: {compHeaderChecksum:X2}");
-			os.WriteLine($"Computed Checksum [body]: {compBodyChecksum:X2}");
+			os.WriteLine($"File Checksum [header]: 0x{HeaderChecksum:X2} (expected: 0x{compHeaderChecksum:X2})");
+			os.WriteLine($"File Checksum   [body]: 0x{BodyChecksum:X2} (expected: 0x{compBodyChecksum:X2})");
 
 			if (HeaderChecksum != compHeaderChecksum || BodyChecksum != compBodyChecksum) {
 				os.WriteLine("!! WARNING: Checksum Mismatch");
+			} else {
+				os.WriteLine("Checksum OK");
 			}
 
 			os.WriteLine($"Signature: " + ReadStringSignature());
@@ -234,10 +233,10 @@ namespace AsmTool
 			var chipRev1 = dev.ReadMemory(0xF38C)?[0];
 
 			if(chipRev0 != null) {
-				Console.WriteLine($"Chip Rev0: 0x{chipRev0:X2}");
+				os.WriteLine($"Chip Rev0: 0x{chipRev0:X2}");
 			}
 			if(chipRev1 != null) {
-				Console.WriteLine($"Chip Rev1: 0x{chipRev1:X2}");
+				os.WriteLine($"Chip Rev1: 0x{chipRev1:X2}");
 			}
 
 		}
